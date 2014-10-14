@@ -1,0 +1,1321 @@
+<!doctype html>
+<html lang="en">
+<head>
+	<meta charset="utf-8">
+	<title>GSM Visualizer</title>
+	<link rel="stylesheet" href="jquery-ui-1.10.2/themes/base/jquery.ui.all.css">
+	<script src="jquery-ui-1.10.2/jquery-1.9.1.js"></script>
+	<script src="jquery-ui-1.10.2/ui/jquery.ui.core.js"></script>
+	<script src="jquery-ui-1.10.2/ui/jquery.ui.widget.js"></script>
+	<script src="jquery-ui-1.10.2/ui/jquery.ui.mouse.js"></script>
+	<script src="jquery-ui-1.10.2/ui/jquery.ui.effect.js"></script>
+	<script src="jquery-ui-1.10.2/ui/jquery.ui.effect-highlight.js"></script>
+	<script src="jquery-ui-1.10.2/ui/jquery.ui.tabs.js"></script>
+	<script src="jquery-ui-1.10.2/ui/jquery.ui.slider.js"></script>
+	<link rel="stylesheet" href="jquery-ui-1.10.2/demos/demos.css">
+	<script>
+
+	var txtimeslot = 0;
+	var rxtimeslot = 5;
+	var txt0tick = 0;
+	var txt1tick = 0;
+	var txt2tick = 0;
+	var txt3tick = 0;
+	var txt4tick = 0;
+	var txt5tick = 0;
+	var txt6tick = 0;
+	var txt7tick = 0;
+	var rxt0tick = 0;
+	var rxt1tick = 0;
+	var rxt2tick = 0;
+	var rxt3tick = 0;
+	var rxt4tick = 0;
+	var rxt5tick = 0;
+	var rxt6tick = 0;
+	var rxt7tick = 0;
+	var pace = 250;
+
+	var TX = [
+		"#TX00",
+		"#TX01",
+		"#TX02",
+		"#TX03",
+		"#TX04",
+		"#TX05",
+		"#TX06",
+		"#TX07",
+		"#TX08",
+		"#TX09",
+		"#TX10",
+		"#TX11",
+		"#TX12",
+		"#TX13",
+		"#TX14",
+		"#TX15",
+		"#TX16",
+		"#TX17",
+		"#TX18",
+		"#TX19",
+		"#TX20",
+		"#TX21",
+		"#TX22",
+		"#TX23",
+		"#TX24",
+		"#TX25",
+		"#TX26",
+		"#TX27",
+		"#TX28",
+		"#TX29",
+		"#TX30",
+		"#TX31",
+		"#TX32",
+		"#TX33",
+		"#TX34",
+		"#TX35",
+		"#TX36",
+		"#TX37",
+		"#TX38",
+		"#TX39",
+		"#TX40",
+		"#TX41",
+		"#TX42",
+		"#TX43",
+		"#TX44",
+		"#TX45",
+		"#TX46",
+		"#TX47",
+		"#TX48",
+		"#TX49",
+		"#TX50"
+	];
+
+	var TXT0CV = [
+		"#TXT0CV00",
+		"#TXT0CV01",
+		"#TXT0CV02", "#TXT0CV02", "#TXT0CV02", "#TXT0CV02",
+		"#TXT0CV06", "#TXT0CV06", "#TXT0CV06", "#TXT0CV06",
+		"#TXT0CV10",
+		"#TXT0CV11",
+		"#TXT0CV12", "#TXT0CV12", "#TXT0CV12", "#TXT0CV12",
+		"#TXT0CV16", "#TXT0CV16", "#TXT0CV16", "#TXT0CV16",
+		"#TXT0CV20",
+		"#TXT0CV21",
+		"#TXT0CV22", "#TXT0CV22", "#TXT0CV22", "#TXT0CV22",
+		"#TXT0CV26", "#TXT0CV26", "#TXT0CV26", "#TXT0CV26",
+		"#TXT0CV30",
+		"#TXT0CV31",
+		"#TXT0CV32", "#TXT0CV32", "#TXT0CV32", "#TXT0CV32",
+		"#TXT0CV36", "#TXT0CV36", "#TXT0CV36", "#TXT0CV36",
+		"#TXT0CV40",
+		"#TXT0CV41",
+		"#TXT0CV42", "#TXT0CV42", "#TXT0CV42", "#TXT0CV42",
+		"#TXT0CV46", "#TXT0CV46", "#TXT0CV46", "#TXT0CV46",
+		"#TXT0CV50"
+	];
+
+	var TXT1CVII = [
+		"#TXT1CVII00", "#TXT1CVII00", "#TXT1CVII00", "#TXT1CVII00",
+		"#TXT1CVII04", "#TXT1CVII04", "#TXT1CVII04", "#TXT1CVII04",
+		"#TXT1CVII08", "#TXT1CVII08", "#TXT1CVII08", "#TXT1CVII08",
+		"#TXT1CVII12", "#TXT1CVII12", "#TXT1CVII12", "#TXT1CVII12",
+		"#TXT1CVII16", "#TXT1CVII16", "#TXT1CVII16", "#TXT1CVII16",
+		"#TXT1CVII20", "#TXT1CVII20", "#TXT1CVII20", "#TXT1CVII20",
+		"#TXT1CVII24", "#TXT1CVII24", "#TXT1CVII24", "#TXT1CVII24",
+		"#TXT1CVII28", "#TXT1CVII28", "#TXT1CVII28", "#TXT1CVII28",
+		"#TXT1CVII32", "#TXT1CVII32", "#TXT1CVII32", "#TXT1CVII32",
+		"#TXT1CVII36", "#TXT1CVII36", "#TXT1CVII36", "#TXT1CVII36",
+		"#TXT1CVII40", "#TXT1CVII40", "#TXT1CVII40", "#TXT1CVII40",
+		"#TXT1CVII44", "#TXT1CVII44", "#TXT1CVII44", "#TXT1CVII44",
+		"#TXT1CVII48",
+		"#TXT1CVII49",
+		"#TXT1CVII50"
+	];
+
+	var TXT2CI = [
+		"#TXT2CI00",
+		"#TXT2CI01",
+		"#TXT2CI02",
+		"#TXT2CI03",
+		"#TXT2CI04",
+		"#TXT2CI05",
+		"#TXT2CI06",
+		"#TXT2CI07",
+		"#TXT2CI08",
+		"#TXT2CI09",
+		"#TXT2CI10",
+		"#TXT2CI11",
+		"#TXT2CI12",
+		"#TXT2CI13",
+		"#TXT2CI14",
+		"#TXT2CI15",
+		"#TXT2CI16",
+		"#TXT2CI17",
+		"#TXT2CI18",
+		"#TXT2CI19",
+		"#TXT2CI20",
+		"#TXT2CI21",
+		"#TXT2CI22",
+		"#TXT2CI23",
+		"#TXT2CI24",
+		"#TXT2CI25"
+	];
+
+	var TXT3CI = [
+		"#TXT3CI00",
+		"#TXT3CI01",
+		"#TXT3CI02",
+		"#TXT3CI03",
+		"#TXT3CI04",
+		"#TXT3CI05",
+		"#TXT3CI06",
+		"#TXT3CI07",
+		"#TXT3CI08",
+		"#TXT3CI09",
+		"#TXT3CI10",
+		"#TXT3CI11",
+		"#TXT3CI12",
+		"#TXT3CI13",
+		"#TXT3CI14",
+		"#TXT3CI15",
+		"#TXT3CI16",
+		"#TXT3CI17",
+		"#TXT3CI18",
+		"#TXT3CI19",
+		"#TXT3CI20",
+		"#TXT3CI21",
+		"#TXT3CI22",
+		"#TXT3CI23",
+		"#TXT3CI24",
+		"#TXT3CI25"
+	];
+
+	var TXT4CI = [
+		"#TXT4CI00",
+		"#TXT4CI01",
+		"#TXT4CI02",
+		"#TXT4CI03",
+		"#TXT4CI04",
+		"#TXT4CI05",
+		"#TXT4CI06",
+		"#TXT4CI07",
+		"#TXT4CI08",
+		"#TXT4CI09",
+		"#TXT4CI10",
+		"#TXT4CI11",
+		"#TXT4CI12",
+		"#TXT4CI13",
+		"#TXT4CI14",
+		"#TXT4CI15",
+		"#TXT4CI16",
+		"#TXT4CI17",
+		"#TXT4CI18",
+		"#TXT4CI19",
+		"#TXT4CI20",
+		"#TXT4CI21",
+		"#TXT4CI22",
+		"#TXT4CI23",
+		"#TXT4CI24",
+		"#TXT4CI25"
+	];
+
+	var TXT5CI = [
+		"#TXT5CI00",
+		"#TXT5CI01",
+		"#TXT5CI02",
+		"#TXT5CI03",
+		"#TXT5CI04",
+		"#TXT5CI05",
+		"#TXT5CI06",
+		"#TXT5CI07",
+		"#TXT5CI08",
+		"#TXT5CI09",
+		"#TXT5CI10",
+		"#TXT5CI11",
+		"#TXT5CI12",
+		"#TXT5CI13",
+		"#TXT5CI14",
+		"#TXT5CI15",
+		"#TXT5CI16",
+		"#TXT5CI17",
+		"#TXT5CI18",
+		"#TXT5CI19",
+		"#TXT5CI20",
+		"#TXT5CI21",
+		"#TXT5CI22",
+		"#TXT5CI23",
+		"#TXT5CI24",
+		"#TXT5CI25"
+	];
+
+	var TXT6CI = [
+		"#TXT6CI00",
+		"#TXT6CI01",
+		"#TXT6CI02",
+		"#TXT6CI03",
+		"#TXT6CI04",
+		"#TXT6CI05",
+		"#TXT6CI06",
+		"#TXT6CI07",
+		"#TXT6CI08",
+		"#TXT6CI09",
+		"#TXT6CI10",
+		"#TXT6CI11",
+		"#TXT6CI12",
+		"#TXT6CI13",
+		"#TXT6CI14",
+		"#TXT6CI15",
+		"#TXT6CI16",
+		"#TXT6CI17",
+		"#TXT6CI18",
+		"#TXT6CI19",
+		"#TXT6CI20",
+		"#TXT6CI21",
+		"#TXT6CI22",
+		"#TXT6CI23",
+		"#TXT6CI24",
+		"#TXT6CI25"
+	];
+
+	var TXT7CI = [
+		"#TXT7CI00",
+		"#TXT7CI01",
+		"#TXT7CI02",
+		"#TXT7CI03",
+		"#TXT7CI04",
+		"#TXT7CI05",
+		"#TXT7CI06",
+		"#TXT7CI07",
+		"#TXT7CI08",
+		"#TXT7CI09",
+		"#TXT7CI10",
+		"#TXT7CI11",
+		"#TXT7CI12",
+		"#TXT7CI13",
+		"#TXT7CI14",
+		"#TXT7CI15",
+		"#TXT7CI16",
+		"#TXT7CI17",
+		"#TXT7CI18",
+		"#TXT7CI19",
+		"#TXT7CI20",
+		"#TXT7CI21",
+		"#TXT7CI22",
+		"#TXT7CI23",
+		"#TXT7CI24",
+		"#TXT7CI25"
+	];
+
+	var RX = [
+		"#RX00", "#RX01", "#RX02", "#RX03", "#RX04",
+		"#RX05", "#RX06", "#RX07", "#RX08", "#RX09",
+		"#RX10", "#RX11", "#RX12", "#RX13", "#RX14",
+		"#RX15", "#RX16", "#RX17", "#RX18", "#RX19",
+		"#RX20", "#RX21", "#RX22", "#RX23", "#RX24",
+		"#RX25", "#RX26", "#RX27", "#RX28", "#RX29",
+		"#RX30", "#RX31", "#RX32", "#RX33", "#RX34",
+		"#RX35", "#RX36", "#RX37", "#RX38", "#RX39",
+		"#RX40", "#RX41", "#RX42", "#RX43", "#RX44",
+		"#RX45", "#RX46", "#RX47", "#RX48", "#RX49",
+		"#RX50"
+	];
+
+	var RXT0CV = [
+		"#RXT0CV00", "#RXT0CV00", "#RXT0CV00", "#RXT0CV00",
+		"#RXT0CV04",
+		"#RXT0CV05",
+		"#RXT0CV06",
+		"#RXT0CV06", "#RXT0CV06", "#RXT0CV06",
+		"#RXT0CV10",
+		"#RXT0CV10", "#RXT0CV10", "#RXT0CV10",
+		"#RXT0CV14",
+		"#RXT0CV15",
+		"#RXT0CV16",
+		"#RXT0CV17",
+		"#RXT0CV18",
+		"#RXT0CV19",
+		"#RXT0CV20",
+		"#RXT0CV21",
+		"#RXT0CV22",
+		"#RXT0CV23",
+		"#RXT0CV24",
+		"#RXT0CV25",
+		"#RXT0CV26",
+		"#RXT0CV27",
+		"#RXT0CV28",
+		"#RXT0CV29",
+		"#RXT0CV30",
+		"#RXT0CV31",
+		"#RXT0CV32",
+		"#RXT0CV33",
+		"#RXT0CV34",
+		"#RXT0CV35",
+		"#RXT0CV36",
+		"#RXT0CV37", "#RXT0CV37", "#RXT0CV37", "#RXT0CV37",
+		"#RXT0CV41", "#RXT0CV41", "#RXT0CV41", "#RXT0CV41",
+		"#RXT0CV45",
+		"#RXT0CV46",
+		"#RXT0CV47", "#RXT0CV47", "#RXT0CV47", "#RXT0CV47"
+	];
+
+	var RXT1CVII = [
+		"#RXT1CVII00", "#RXT1CVII00", "#RXT1CVII00", "#RXT1CVII00",
+		"#RXT1CVII04", "#RXT1CVII04", "#RXT1CVII04", "#RXT1CVII04",
+		"#RXT1CVII08", "#RXT1CVII08", "#RXT1CVII08", "#RXT1CVII08",
+		"#RXT1CVII09",
+		"#RXT1CVII10",
+		"#RXT1CVII11",
+		"#RXT1CVII15", "#RXT1CVII15", "#RXT1CVII15", "#RXT1CVII15",
+		"#RXT1CVII19", "#RXT1CVII19", "#RXT1CVII19", "#RXT1CVII19",
+		"#RXT1CVII23", "#RXT1CVII23", "#RXT1CVII23", "#RXT1CVII23",
+		"#RXT1CVII27", "#RXT1CVII27", "#RXT1CVII27", "#RXT1CVII27",
+		"#RXT1CVII31", "#RXT1CVII31", "#RXT1CVII31", "#RXT1CVII31",
+		"#RXT1CVII35", "#RXT1CVII35", "#RXT1CVII35", "#RXT1CVII35",
+		"#RXT1CVII39", "#RXT1CVII39", "#RXT1CVII39", "#RXT1CVII39",
+		"#RXT1CVII43", "#RXT1CVII43", "#RXT1CVII43", "#RXT1CVII43",
+		"#RXT1CVII47", "#RXT1CVII47", "#RXT1CVII47", "#RXT1CVII47"
+	];
+
+	var RXT2CI = [
+		"#RXT2CI00",
+		"#RXT2CI01",
+		"#RXT2CI02",
+		"#RXT2CI03",
+		"#RXT2CI04",
+		"#RXT2CI05",
+		"#RXT2CI06",
+		"#RXT2CI07",
+		"#RXT2CI08",
+		"#RXT2CI09",
+		"#RXT2CI10",
+		"#RXT2CI11",
+		"#RXT2CI12",
+		"#RXT2CI13",
+		"#RXT2CI14",
+		"#RXT2CI15",
+		"#RXT2CI16",
+		"#RXT2CI17",
+		"#RXT2CI18",
+		"#RXT2CI19",
+		"#RXT2CI20",
+		"#RXT2CI21",
+		"#RXT2CI22",
+		"#RXT2CI23",
+		"#RXT2CI24",
+		"#RXT2CI25"
+	];
+
+	var RXT3CI = [
+		"#RXT3CI00",
+		"#RXT3CI01",
+		"#RXT3CI02",
+		"#RXT3CI03",
+		"#RXT3CI04",
+		"#RXT3CI05",
+		"#RXT3CI06",
+		"#RXT3CI07",
+		"#RXT3CI08",
+		"#RXT3CI09",
+		"#RXT3CI10",
+		"#RXT3CI11",
+		"#RXT3CI12",
+		"#RXT3CI13",
+		"#RXT3CI14",
+		"#RXT3CI15",
+		"#RXT3CI16",
+		"#RXT3CI17",
+		"#RXT3CI18",
+		"#RXT3CI19",
+		"#RXT3CI20",
+		"#RXT3CI21",
+		"#RXT3CI22",
+		"#RXT3CI23",
+		"#RXT3CI24",
+		"#RXT3CI25"
+	];
+
+	var RXT4CI = [
+		"#RXT4CI00",
+		"#RXT4CI01",
+		"#RXT4CI02",
+		"#RXT4CI03",
+		"#RXT4CI04",
+		"#RXT4CI05",
+		"#RXT4CI06",
+		"#RXT4CI07",
+		"#RXT4CI08",
+		"#RXT4CI09",
+		"#RXT4CI10",
+		"#RXT4CI11",
+		"#RXT4CI12",
+		"#RXT4CI13",
+		"#RXT4CI14",
+		"#RXT4CI15",
+		"#RXT4CI16",
+		"#RXT4CI17",
+		"#RXT4CI18",
+		"#RXT4CI19",
+		"#RXT4CI20",
+		"#RXT4CI21",
+		"#RXT4CI22",
+		"#RXT4CI23",
+		"#RXT4CI24",
+		"#RXT4CI25"
+	];
+
+	var RXT5CI = [
+		"#RXT5CI00",
+		"#RXT5CI01",
+		"#RXT5CI02",
+		"#RXT5CI03",
+		"#RXT5CI04",
+		"#RXT5CI05",
+		"#RXT5CI06",
+		"#RXT5CI07",
+		"#RXT5CI08",
+		"#RXT5CI09",
+		"#RXT5CI10",
+		"#RXT5CI11",
+		"#RXT5CI12",
+		"#RXT5CI13",
+		"#RXT5CI14",
+		"#RXT5CI15",
+		"#RXT5CI16",
+		"#RXT5CI17",
+		"#RXT5CI18",
+		"#RXT5CI19",
+		"#RXT5CI20",
+		"#RXT5CI21",
+		"#RXT5CI22",
+		"#RXT5CI23",
+		"#RXT5CI24",
+		"#RXT5CI25"
+	];
+
+	var RXT6CI = [
+		"#RXT6CI00",
+		"#RXT6CI01",
+		"#RXT6CI02",
+		"#RXT6CI03",
+		"#RXT6CI04",
+		"#RXT6CI05",
+		"#RXT6CI06",
+		"#RXT6CI07",
+		"#RXT6CI08",
+		"#RXT6CI09",
+		"#RXT6CI10",
+		"#RXT6CI11",
+		"#RXT6CI12",
+		"#RXT6CI13",
+		"#RXT6CI14",
+		"#RXT6CI15",
+		"#RXT6CI16",
+		"#RXT6CI17",
+		"#RXT6CI18",
+		"#RXT6CI19",
+		"#RXT6CI20",
+		"#RXT6CI21",
+		"#RXT6CI22",
+		"#RXT6CI23",
+		"#RXT6CI24",
+		"#RXT6CI25"
+	];
+
+	var RXT7CI = [
+		"#RXT7CI00",
+		"#RXT7CI01",
+		"#RXT7CI02",
+		"#RXT7CI03",
+		"#RXT7CI04",
+		"#RXT7CI05",
+		"#RXT7CI06",
+		"#RXT7CI07",
+		"#RXT7CI08",
+		"#RXT7CI09",
+		"#RXT7CI10",
+		"#RXT7CI11",
+		"#RXT7CI12",
+		"#RXT7CI13",
+		"#RXT7CI14",
+		"#RXT7CI15",
+		"#RXT7CI16",
+		"#RXT7CI17",
+		"#RXT7CI18",
+		"#RXT7CI19",
+		"#RXT7CI20",
+		"#RXT7CI21",
+		"#RXT7CI22",
+		"#RXT7CI23",
+		"#RXT7CI24",
+		"#RXT7CI25"
+	];
+
+	function paint() {
+		// tx
+		if (txtimeslot == 0) {
+			$("#TXT0").effect("highlight", {color: "#FF0000"}, pace);
+			$(TX[txt0tick]).effect("highlight", {color: "#FF0000"}, pace);
+			$(TXT0CV[txt0tick]).effect("highlight", {color: "#000000"}, pace);
+
+			txt0tick++;
+			if (txt0tick == 51) {
+				txt0tick = 0;
+			}
+
+		} else if (txtimeslot == 1) {
+			$("#TXT1").effect("highlight", {color: "#FF0000"}, pace);
+			$(TX[txt1tick]).effect("highlight", {color: "#FF0000"}, pace);
+			$(TXT1CVII[txt1tick]).effect("highlight", {color: "#000000"}, pace);
+
+			txt1tick++;
+			if (txt1tick == 51) {
+				txt1tick = 0;
+			}
+
+		} else if (txtimeslot == 2) {
+			$("#TXT2").effect("highlight", {color: "#FF0000"}, pace);
+			$(TX[txt2tick]).effect("highlight", {color: "#FF0000"}, pace);
+			$(TXT2CI[txt2tick]).effect("highlight", {color: "#000000"}, pace);
+
+			txt2tick++;
+			if (txt2tick == 26) {
+				txt2tick = 0;
+			}
+
+		} else if (txtimeslot == 3) {
+			$("#TXT3").effect("highlight", {color: "#FF0000"}, pace);
+			$(TX[txt3tick]).effect("highlight", {color: "#FF0000"}, pace);
+			$(TXT3CI[txt3tick]).effect("highlight", {color: "#000000"}, pace);
+
+			txt3tick++;
+			if (txt3tick == 26) {
+				txt3tick = 0;
+			}
+
+		} else if (txtimeslot == 4) {
+			$("#TXT4").effect("highlight", {color: "#FF0000"}, pace);
+			$(TX[txt4tick]).effect("highlight", {color: "#FF0000"}, pace);
+			$(TXT4CI[txt4tick]).effect("highlight", {color: "#000000"}, pace);
+
+			txt4tick++;
+			if (txt4tick == 26) {
+				txt4tick = 0;
+			}
+
+		} else if (txtimeslot == 5) {
+			$("#TXT5").effect("highlight", {color: "#FF0000"}, pace);
+			$(TX[txt5tick]).effect("highlight", {color: "#FF0000"}, pace);
+			$(TXT5CI[txt5tick]).effect("highlight", {color: "#000000"}, pace);
+
+			txt5tick++;
+			if (txt5tick == 26) {
+				txt5tick = 0;
+			}
+
+		} else if (txtimeslot == 6) {
+			$("#TXT6").effect("highlight", {color: "#FF0000"}, pace);
+			$(TX[txt6tick]).effect("highlight", {color: "#FF0000"}, pace);
+			$(TXT6CI[txt6tick]).effect("highlight", {color: "#000000"}, pace);
+
+			txt6tick++;
+			if (txt6tick == 26) {
+				txt6tick = 0;
+			}
+
+		} else if (txtimeslot == 7) {
+			$("#TXT7").effect("highlight", {color: "#FF0000"}, pace);
+			$(TX[txt7tick]).effect("highlight", {color: "#FF0000"}, pace);
+			$(TXT7CI[txt7tick]).effect("highlight", {color: "#000000"}, pace);
+
+			txt7tick++;
+			if (txt7tick == 26) {
+				txt7tick = 0;
+			}
+		}
+
+		// rx
+		if (rxtimeslot == 0) {
+			$("#RXT0").effect("highlight", {color: "#00FF00"}, pace);
+			$(RX[rxt0tick]).effect("highlight", {color: "#00FF00"}, pace);
+			$(RXT0CV[rxt0tick]).effect("highlight", {color: "#000000"}, pace);
+
+			rxt0tick++;
+			if (rxt0tick == 51) {
+				rxt0tick = 0;
+			}
+
+		} else if (rxtimeslot == 1) {
+			$("#RXT1").effect("highlight", {color: "#00FF00"}, pace);
+			$(RX[rxt1tick]).effect("highlight", {color: "#00FF00"}, pace);
+			$(RXT1CVII[rxt1tick]).effect("highlight", {color: "#000000"}, pace);
+
+			rxt1tick++;
+			if (rxt1tick == 51) {
+				rxt1tick = 0;
+			}
+
+		} else if (rxtimeslot == 2) {
+			$("#RXT2").effect("highlight", {color: "#00FF00"}, pace);
+			$(RX[rxt2tick]).effect("highlight", {color: "#00FF00"}, pace);
+			$(RXT2CI[rxt2tick]).effect("highlight", {color: "#000000"}, pace);
+
+			rxt2tick++;
+			if (rxt2tick == 26) {
+				rxt2tick = 0;
+			}
+
+		} else if (rxtimeslot == 3) {
+			$("#RXT3").effect("highlight", {color: "#00FF00"}, pace);
+			$(RX[rxt3tick]).effect("highlight", {color: "#00FF00"}, pace);
+			$(RXT3CI[rxt3tick]).effect("highlight", {color: "#000000"}, pace);
+
+			rxt3tick++;
+			if (rxt3tick == 26) {
+				rxt3tick = 0;
+			}
+
+		} else if (rxtimeslot == 4) {
+			$("#RXT4").effect("highlight", {color: "#00FF00"}, pace);
+			$(RX[rxt4tick]).effect("highlight", {color: "#00FF00"}, pace);
+			$(RXT4CI[rxt4tick]).effect("highlight", {color: "#000000"}, pace);
+
+			rxt4tick++;
+			if (rxt4tick == 26) {
+				rxt4tick = 0;
+			}
+
+		} else if (rxtimeslot == 5) {
+			$("#RXT5").effect("highlight", {color: "#00FF00"}, pace);
+			$(RX[rxt5tick]).effect("highlight", {color: "#00FF00"}, pace);
+			$(RXT5CI[rxt5tick]).effect("highlight", {color: "#000000"}, pace);
+
+			rxt5tick++;
+			if (rxt5tick == 26) {
+				rxt5tick = 0;
+			}
+
+		} else if (rxtimeslot == 6) {
+			$("#RXT6").effect("highlight", {color: "#00FF00"}, pace);
+			$(RX[rxt6tick]).effect("highlight", {color: "#00FF00"}, pace);
+			$(RXT6CI[rxt6tick]).effect("highlight", {color: "#000000"}, pace);
+
+			rxt6tick++;
+			if (rxt6tick == 26) {
+				rxt6tick = 0;
+			}
+
+		} else if (rxtimeslot == 7) {
+			$("#RXT7").effect("highlight", {color: "#00FF00"}, pace);
+			$(RX[rxt7tick]).effect("highlight", {color: "#00FF00"}, pace);
+			$(RXT7CI[rxt7tick]).effect("highlight", {color: "#000000"}, pace);
+
+			rxt7tick++;
+			if (rxt7tick == 26) {
+				rxt7tick = 0;
+			}
+		}
+
+		txtimeslot++;
+		if (txtimeslot == 8) {
+			txtimeslot = 0;
+		}
+		rxtimeslot++;
+		if (rxtimeslot == 8) {
+			rxtimeslot = 0;
+		}
+
+		setTimeout(paint, pace);
+	}
+
+	$(document).ready(function() {
+		$( "#tabs" ).tabs();
+		$( "#slider" ).slider({
+			value: 250,
+			min: 0,
+			max: 495,
+			step: 10,
+			slide: function( event, ui ) {
+				pace = 500 - ui.value;
+			}
+		});
+
+		paint();
+
+	});
+	</script>
+</head>
+<body>
+	<h1>Timeslots and Combinations</h1>
+	<i>Adjust speed with slider in upper-left cell.</i>
+	<h1>Downlink</h1>
+	<table border="1" cellpadding="2" cellspacing="0">
+		<tr>
+			<td><div id="slider"></div></td>
+			<td id="TX00" align="center"><strong>00</strong></td>
+			<td id="TX01" align="center"><strong>01</strong></td>
+			<td id="TX02" align="center"><strong>02</strong></td>
+			<td id="TX03" align="center"><strong>03</strong></td>
+			<td id="TX04" align="center"><strong>04</strong></td>
+			<td id="TX05" align="center"><strong>05</strong></td>
+			<td id="TX06" align="center"><strong>06</strong></td>
+			<td id="TX07" align="center"><strong>07</strong></td>
+			<td id="TX08" align="center"><strong>08</strong></td>
+			<td id="TX09" align="center"><strong>09</strong></td>
+			<td id="TX10" align="center"><strong>10</strong></td>
+			<td id="TX11" align="center"><strong>11</strong></td>
+			<td id="TX12" align="center"><strong>12</strong></td>
+			<td id="TX13" align="center"><strong>13</strong></td>
+			<td id="TX14" align="center"><strong>14</strong></td>
+			<td id="TX15" align="center"><strong>15</strong></td>
+			<td id="TX16" align="center"><strong>16</strong></td>
+			<td id="TX17" align="center"><strong>17</strong></td>
+			<td id="TX18" align="center"><strong>18</strong></td>
+			<td id="TX19" align="center"><strong>19</strong></td>
+			<td id="TX20" align="center"><strong>20</strong></td>
+			<td id="TX21" align="center"><strong>21</strong></td>
+			<td id="TX22" align="center"><strong>22</strong></td>
+			<td id="TX23" align="center"><strong>23</strong></td>
+			<td id="TX24" align="center"><strong>24</strong></td>
+			<td id="TX25" align="center"><strong>25</strong></td>
+			<td id="TX26" align="center"><strong>26</strong></td>
+			<td id="TX27" align="center"><strong>27</strong></td>
+			<td id="TX28" align="center"><strong>28</strong></td>
+			<td id="TX29" align="center"><strong>29</strong></td>
+			<td id="TX30" align="center"><strong>30</strong></td>
+			<td id="TX31" align="center"><strong>31</strong></td>
+			<td id="TX32" align="center"><strong>32</strong></td>
+			<td id="TX33" align="center"><strong>33</strong></td>
+			<td id="TX34" align="center"><strong>34</strong></td>
+			<td id="TX35" align="center"><strong>35</strong></td>
+			<td id="TX36" align="center"><strong>36</strong></td>
+			<td id="TX37" align="center"><strong>37</strong></td>
+			<td id="TX38" align="center"><strong>38</strong></td>
+			<td id="TX39" align="center"><strong>39</strong></td>
+			<td id="TX40" align="center"><strong>40</strong></td>
+			<td id="TX41" align="center"><strong>41</strong></td>
+			<td id="TX42" align="center"><strong>42</strong></td>
+			<td id="TX43" align="center"><strong>43</strong></td>
+			<td id="TX44" align="center"><strong>44</strong></td>
+			<td id="TX45" align="center"><strong>45</strong></td>
+			<td id="TX46" align="center"><strong>46</strong></td>
+			<td id="TX47" align="center"><strong>47</strong></td>
+			<td id="TX48" align="center"><strong>48</strong></td>
+			<td id="TX49" align="center"><strong>49</strong></td>
+			<td id="TX50" align="center"><strong>50</strong></td>
+		</tr>
+		<tr>
+			<td id="TXT0" align="center"><strong>T0</strong><br>Combination V</td>
+			<td id="TXT0CV00" align="center" style="background-color: #C9C9C6">F<br>C<br>H</td>
+			<td id="TXT0CV01" align="center" style="background-color: #F9DCC3">S<br>C<br>H</td>
+			<td id="TXT0CV02" align="center" colspan="4" style="background-color: #1CB963">BCCH</td>
+			<td id="TXT0CV06" align="center" colspan="4" style="background-color: #1586CD">CCCH</td>
+			<td id="TXT0CV10" align="center" style="background-color: #C9C9C6">F<br>C<br>H</td>
+			<td id="TXT0CV11" align="center" style="background-color: #F9DCC3">S<br>C<br>H</td>
+			<td id="TXT0CV12" align="center" colspan="4" style="background-color: #1586CD">CCCH</td>
+			<td id="TXT0CV16" align="center" colspan="4" style="background-color: #1586CD">CCCH</td>
+			<td id="TXT0CV20" align="center" style="background-color: #C9C9C6">F<br>C<br>H</td>
+			<td id="TXT0CV21" align="center" style="background-color: #F9DCC3">S<br>C<br>H</td>
+			<td id="TXT0CV22" align="center" colspan="4" style="background-color: #FDF736">SDCCH 0</td>
+			<td id="TXT0CV26" align="center" colspan="4" style="background-color: #FDF736">SDCCH 1</td>
+			<td id="TXT0CV30" align="center" style="background-color: #C9C9C6">F<br>C<br>H</td>
+			<td id="TXT0CV31" align="center" style="background-color: #F9DCC3">S<br>C<br>H</td>
+			<td id="TXT0CV32" align="center" colspan="4" style="background-color: #FDF736">SDCCH 2</td>
+			<td id="TXT0CV36" align="center" colspan="4" style="background-color: #FDF736">SDCCH 3</td>
+			<td id="TXT0CV40" align="center" style="background-color: #C9C9C6">F<br>C<br>H</td>
+			<td id="TXT0CV41" align="center" style="background-color: #F9DCC3">S<br>C<br>H</td>
+			<td id="TXT0CV42" align="center" colspan="4" style="background-color: #FDC72E">SACCH 2</td>
+			<td id="TXT0CV46" align="center" colspan="4" style="background-color: #FDC72E">SACCH 3</td>
+			<td id="TXT0CV50" align="center">I<br>D<br>L<br>E</td>
+		</tr>
+		<tr>
+			<td id="TXT1" align="center"><strong>T1</strong><br>Combination VII</td>
+			<td id="TXT1CVII00" align="center" colspan="4" style="background-color: #FDF736">SDCCH 0</td>
+			<td id="TXT1CVII04" align="center" colspan="4" style="background-color: #FDF736">SDCCH 1</td>
+			<td id="TXT1CVII08" align="center" colspan="4" style="background-color: #FDF736">SDCCH 2</td>
+			<td id="TXT1CVII12" align="center" colspan="4" style="background-color: #FDF736">SDCCH 3</td>
+			<td id="TXT1CVII16" align="center" colspan="4" style="background-color: #FDF736">SDCCH 4</td>
+			<td id="TXT1CVII20" align="center" colspan="4" style="background-color: #FDF736">SDCCH 5</td>
+			<td id="TXT1CVII24" align="center" colspan="4" style="background-color: #FDF736">SDCCH 6</td>
+			<td id="TXT1CVII28" align="center" colspan="4" style="background-color: #FDF736">SDCCH 7</td>
+			<td id="TXT1CVII32" align="center" colspan="4" style="background-color: #FDC72E">SACCH 0</td>
+			<td id="TXT1CVII36" align="center" colspan="4" style="background-color: #FDC72E">SACCH 1</td>
+			<td id="TXT1CVII40" align="center" colspan="4" style="background-color: #FDC72E">SACCH 2</td>
+			<td id="TXT1CVII44" align="center" colspan="4" style="background-color: #FDC72E">SACCH 3</td>
+			<td id="TXT1CVII48" align="center">I<br>D<br>L<br>E</td>
+			<td id="TXT1CVII49" align="center">I<br>D<br>L<br>E</td>
+			<td id="TXT1CVII50" align="center">I<br>D<br>L<br>E</td>
+		</tr>
+		<tr>
+			<td id="TXT2" align="center"><strong>T2</strong><br>Combination I</td>
+			<td id="TXT2CI00" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI01" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI02" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI03" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI04" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI05" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI06" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI07" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI08" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI09" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI10" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI11" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI12" align="center" style="background-color: #FDC72E">S<br>A<br>C<br>C<br>H</td>
+			<td id="TXT2CI13" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI14" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI15" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI16" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI17" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI18" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI19" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI20" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI21" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI22" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI23" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI24" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT2CI25" align="center">I<br>D<br>L<br>E</td>
+			<td colspan="25"></td>
+		</tr>
+		<tr>
+			<td id="TXT3" align="center"><strong>T3</strong><br>Combination I</td>
+			<td id="TXT3CI00" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI01" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI02" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI03" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI04" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI05" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI06" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI07" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI08" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI09" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI10" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI11" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI12" align="center" style="background-color: #FDC72E">S<br>A<br>C<br>C<br>H</td>
+			<td id="TXT3CI13" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI14" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI15" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI16" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI17" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI18" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI19" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI20" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI21" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI22" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI23" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI24" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT3CI25" align="center">I<br>D<br>L<br>E</td>
+			<td colspan="25"></td>
+		</tr>
+		<tr>
+			<td id="TXT4" align="center"><strong>T4</strong><br>Combination I</td>
+			<td id="TXT4CI00" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI01" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI02" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI03" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI04" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI05" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI06" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI07" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI08" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI09" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI10" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI11" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI12" align="center" style="background-color: #FDC72E">S<br>A<br>C<br>C<br>H</td>
+			<td id="TXT4CI13" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI14" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI15" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI16" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI17" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI18" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI19" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI20" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI21" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI22" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI23" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI24" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT4CI25" align="center">I<br>D<br>L<br>E</td>
+			<td colspan="25"></td>
+		</tr>
+		<tr>
+			<td id="TXT5" align="center"><strong>T5</strong><br>Combination I</td>
+			<td id="TXT5CI00" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI01" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI02" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI03" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI04" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI05" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI06" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI07" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI08" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI09" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI10" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI11" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI12" align="center" style="background-color: #FDC72E">S<br>A<br>C<br>C<br>H</td>
+			<td id="TXT5CI13" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI14" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI15" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI16" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI17" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI18" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI19" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI20" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI21" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI22" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI23" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI24" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT5CI25" align="center">I<br>D<br>L<br>E</td>
+			<td colspan="25"></td>
+		</tr>
+		<tr>
+			<td id="TXT6" align="center"><strong>T6</strong><br>Combination I</td>
+			<td id="TXT6CI00" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI01" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI02" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI03" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI04" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI05" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI06" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI07" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI08" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI09" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI10" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI11" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI12" align="center" style="background-color: #FDC72E">S<br>A<br>C<br>C<br>H</td>
+			<td id="TXT6CI13" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI14" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI15" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI16" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI17" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI18" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI19" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI20" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI21" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI22" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI23" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI24" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT6CI25" align="center">I<br>D<br>L<br>E</td>
+			<td colspan="25"></td>
+		</tr>
+		<tr>
+			<td id="TXT7" align="center"><strong>T7</strong><br>Combination I</td>
+			<td id="TXT7CI00" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI01" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI02" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI03" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI04" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI05" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI06" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI07" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI08" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI09" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI10" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI11" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI12" align="center" style="background-color: #FDC72E">S<br>A<br>C<br>C<br>H</td>
+			<td id="TXT7CI13" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI14" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI15" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI16" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI17" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI18" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI19" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI20" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI21" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI22" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI23" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI24" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="TXT7CI25" align="center">I<br>D<br>L<br>E</td>
+			<td colspan="25"></td>
+		</tr>
+	</table>
+
+	<h1>Uplink</h1>
+	<table border="1" cellpadding="2" cellspacing="0">
+		<tr>
+			<td>&nbsp;</td>
+			<td id="RX00" align="center"><strong>00</strong></td>
+			<td id="RX01" align="center"><strong>01</strong></td>
+			<td id="RX02" align="center"><strong>02</strong></td>
+			<td id="RX03" align="center"><strong>03</strong></td>
+			<td id="RX04" align="center"><strong>04</strong></td>
+			<td id="RX05" align="center"><strong>05</strong></td>
+			<td id="RX06" align="center"><strong>06</strong></td>
+			<td id="RX07" align="center"><strong>07</strong></td>
+			<td id="RX08" align="center"><strong>08</strong></td>
+			<td id="RX09" align="center"><strong>09</strong></td>
+			<td id="RX10" align="center"><strong>10</strong></td>
+			<td id="RX11" align="center"><strong>11</strong></td>
+			<td id="RX12" align="center"><strong>12</strong></td>
+			<td id="RX13" align="center"><strong>13</strong></td>
+			<td id="RX14" align="center"><strong>14</strong></td>
+			<td id="RX15" align="center"><strong>15</strong></td>
+			<td id="RX16" align="center"><strong>16</strong></td>
+			<td id="RX17" align="center"><strong>17</strong></td>
+			<td id="RX18" align="center"><strong>18</strong></td>
+			<td id="RX19" align="center"><strong>19</strong></td>
+			<td id="RX20" align="center"><strong>20</strong></td>
+			<td id="RX21" align="center"><strong>21</strong></td>
+			<td id="RX22" align="center"><strong>22</strong></td>
+			<td id="RX23" align="center"><strong>23</strong></td>
+			<td id="RX24" align="center"><strong>24</strong></td>
+			<td id="RX25" align="center"><strong>25</strong></td>
+			<td id="RX26" align="center"><strong>26</strong></td>
+			<td id="RX27" align="center"><strong>27</strong></td>
+			<td id="RX28" align="center"><strong>28</strong></td>
+			<td id="RX29" align="center"><strong>29</strong></td>
+			<td id="RX30" align="center"><strong>30</strong></td>
+			<td id="RX31" align="center"><strong>31</strong></td>
+			<td id="RX32" align="center"><strong>32</strong></td>
+			<td id="RX33" align="center"><strong>33</strong></td>
+			<td id="RX34" align="center"><strong>34</strong></td>
+			<td id="RX35" align="center"><strong>35</strong></td>
+			<td id="RX36" align="center"><strong>36</strong></td>
+			<td id="RX37" align="center"><strong>37</strong></td>
+			<td id="RX38" align="center"><strong>38</strong></td>
+			<td id="RX39" align="center"><strong>39</strong></td>
+			<td id="RX40" align="center"><strong>40</strong></td>
+			<td id="RX41" align="center"><strong>41</strong></td>
+			<td id="RX42" align="center"><strong>42</strong></td>
+			<td id="RX43" align="center"><strong>43</strong></td>
+			<td id="RX44" align="center"><strong>44</strong></td>
+			<td id="RX45" align="center"><strong>45</strong></td>
+			<td id="RX46" align="center"><strong>46</strong></td>
+			<td id="RX47" align="center"><strong>47</strong></td>
+			<td id="RX48" align="center"><strong>48</strong></td>
+			<td id="RX49" align="center"><strong>49</strong></td>
+			<td id="RX50" align="center"><strong>50</strong></td>
+		</tr>
+		<tr>
+			<td id="RXT0" align="center"><strong>T0</strong><br>Combination V</td>
+			<td id="RXT0CV00" align="center" colspan="4" style="background-color: #FDF736">SDCCH 3</td>
+			<td id="RXT0CV04" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV05" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV06" align="center" colspan="4" style="background-color: #FDC72E">SACCH 2</td>
+			<td id="RXT0CV10" align="center" colspan="4" style="background-color: #FDC72E">SACCH 3</td>
+			<td id="RXT0CV14" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV15" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV16" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV17" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV18" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV19" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV20" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV21" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV22" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV23" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV24" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV25" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV26" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV27" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV28" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV29" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV30" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV31" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV32" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV33" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV34" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV35" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV36" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV37" align="center" colspan="4" style="background-color: #FDF736">SDCCH 0</td>
+			<td id="RXT0CV41" align="center" colspan="4" style="background-color: #FDF736">SDCCH 1</td>
+			<td id="RXT0CV45" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV46" align="center" style="background-color: #20BEEF">R<br>A<br>C<br>H</td>
+			<td id="RXT0CV47" align="center" colspan="4" style="background-color: #FDF736">SDCCH 2</td>
+		</tr>
+		<tr>
+			<td id="RXT1" align="center"><strong>T1</strong><br>Combination VII</td>
+			<td id="RXT1CVII00" align="center" colspan="4" style="background-color: #FDC72E">SACCH 1</td>
+			<td id="RXT1CVII04" align="center" colspan="4" style="background-color: #FDC72E">SACCH 2</td>
+			<td id="RXT1CVII08" align="center" colspan="4" style="background-color: #FDC72E">SACCH 3</td>
+			<td id="RXT1CVII09" align="center">I<br>D<br>L<br>E</td>
+			<td id="RXT1CVII10" align="center">I<br>D<br>L<br>E</td>
+			<td id="RXT1CVII11" align="center">I<br>D<br>L<br>E</td>
+			<td id="RXT1CVII15" align="center" colspan="4" style="background-color: #FDF736">SDCCH 0</td>
+			<td id="RXT1CVII19" align="center" colspan="4" style="background-color: #FDF736">SDCCH 1</td>
+			<td id="RXT1CVII23" align="center" colspan="4" style="background-color: #FDF736">SDCCH 2</td>
+			<td id="RXT1CVII27" align="center" colspan="4" style="background-color: #FDF736">SDCCH 3</td>
+			<td id="RXT1CVII31" align="center" colspan="4" style="background-color: #FDF736">SDCCH 4</td>
+			<td id="RXT1CVII35" align="center" colspan="4" style="background-color: #FDF736">SDCCH 5</td>
+			<td id="RXT1CVII39" align="center" colspan="4" style="background-color: #FDF736">SDCCH 6</td>
+			<td id="RXT1CVII43" align="center" colspan="4" style="background-color: #FDF736">SDCCH 7</td>
+			<td id="RXT1CVII47" align="center" colspan="4" style="background-color: #FDC72E">SACCH 0</td>
+		</tr>
+		<tr>
+			<td id="RXT2" align="center"><strong>T2</strong><br>Combination I</td>
+			<td id="RXT2CI00" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI01" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI02" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI03" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI04" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI05" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI06" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI07" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI08" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI09" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI10" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI11" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI12" align="center" style="background-color: #FDC72E">S<br>A<br>C<br>C<br>H</td>
+			<td id="RXT2CI13" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI14" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI15" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI16" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI17" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI18" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI19" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI20" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI21" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI22" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI23" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI24" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT2CI25" align="center">I<br>D<br>L<br>E</td>
+			<td colspan="25"></td>
+		</tr>
+		<tr>
+			<td id="RXT3" align="center"><strong>T3</strong><br>Combination I</td>
+			<td id="RXT3CI00" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI01" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI02" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI03" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI04" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI05" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI06" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI07" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI08" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI09" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI10" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI11" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI12" align="center" style="background-color: #FDC72E">S<br>A<br>C<br>C<br>H</td>
+			<td id="RXT3CI13" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI14" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI15" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI16" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI17" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI18" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI19" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI20" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI21" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI22" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI23" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI24" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT3CI25" align="center">I<br>D<br>L<br>E</td>
+			<td colspan="25"></td>
+		</tr>
+		<tr>
+			<td id="RXT4" align="center"><strong>T4</strong><br>Combination I</td>
+			<td id="RXT4CI00" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI01" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI02" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI03" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI04" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI05" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI06" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI07" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI08" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI09" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI10" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI11" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI12" align="center" style="background-color: #FDC72E">S<br>A<br>C<br>C<br>H</td>
+			<td id="RXT4CI13" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI14" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI15" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI16" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI17" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI18" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI19" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI20" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI21" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI22" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI23" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI24" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT4CI25" align="center">I<br>D<br>L<br>E</td>
+			<td colspan="25"></td>
+		</tr>
+		<tr>
+			<td id="RXT5" align="center"><strong>T5</strong><br>Combination I</td>
+			<td id="RXT5CI00" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI01" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI02" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI03" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI04" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI05" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI06" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI07" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI08" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI09" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI10" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI11" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI12" align="center" style="background-color: #FDC72E">S<br>A<br>C<br>C<br>H</td>
+			<td id="RXT5CI13" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI14" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI15" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI16" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI17" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI18" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI19" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI20" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI21" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI22" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI23" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI24" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT5CI25" align="center">I<br>D<br>L<br>E</td>
+			<td colspan="25"></td>
+		</tr>
+		<tr>
+			<td id="RXT6" align="center"><strong>T6</strong><br>Combination I</td>
+			<td id="RXT6CI00" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI01" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI02" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI03" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI04" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI05" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI06" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI07" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI08" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI09" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI10" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI11" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI12" align="center" style="background-color: #FDC72E">S<br>A<br>C<br>C<br>H</td>
+			<td id="RXT6CI13" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI14" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI15" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI16" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI17" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI18" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI19" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI20" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI21" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI22" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI23" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI24" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT6CI25" align="center">I<br>D<br>L<br>E</td>
+			<td colspan="25"></td>
+		</tr>
+		<tr>
+			<td id="RXT7" align="center"><strong>T7</strong><br>Combination I</td>
+			<td id="RXT7CI00" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI01" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI02" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI03" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI04" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI05" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI06" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI07" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI08" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI09" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI10" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI11" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI12" align="center" style="background-color: #FDC72E">S<br>A<br>C<br>C<br>H</td>
+			<td id="RXT7CI13" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI14" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI15" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI16" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI17" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI18" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI19" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI20" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI21" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI22" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI23" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI24" align="center" style="background-color: #C3E4EB">T<br>C<br>H</td>
+			<td id="RXT7CI25" align="center">I<br>D<br>L<br>E</td>
+			<td colspan="25"></td>
+		</tr>
+	</table>
+</body>
+</html>
