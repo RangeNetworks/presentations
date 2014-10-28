@@ -5,9 +5,9 @@ These visualizers were originally written as internal demos for other developers
 
 Demo videos here:
 
- 1. ARFCN grid (visualizer1.html): https://www.dropbox.com/s/z4453j5qtqex2yx/PhysicalStatusAPIWebSocket.mov?dl=0
- 1. streaming toggleable charts (visualizer2.html): https://www.dropbox.com/s/286wfljjsxfkhkr/PhysicalStatusAPIWebSocket2.m4v?dl=0
- 1. RAN graph (visualizer3.html): https://www.dropbox.com/s/6dugq3wn72kvfsu/PhysicalStatusAPIWebSocket3.m4v?dl=0
+ 1. [ARFCN grid](https://www.dropbox.com/s/z4453j5qtqex2yx/PhysicalStatusAPIWebSocket.mov?dl=0) - visualizer1.html
+ 1. [streaming IMSI charts](https://www.dropbox.com/s/286wfljjsxfkhkr/PhysicalStatusAPIWebSocket2.m4v?dl=0) - visualizer2.html
+ 1. [RAN activity graph](https://www.dropbox.com/s/6dugq3wn72kvfsu/PhysicalStatusAPIWebSocket3.m4v?dl=0) - visualizer3.html
 
 Code and libraries used:
 
