@@ -1,0 +1,275 @@
+<html>
+	<head>
+		<title>NodeManager Events API Visualizer</title>
+		<style>
+		html, body {
+			width:  100%;
+			height: 100%;
+			margin: 0px;
+		}
+		.deactivated {
+			text-decoration: line-through;
+		}
+		.activated {
+			text-decoration: none;
+		}
+		.leftMenu {
+			float: left;
+			width: 150px;
+			height: 100%;
+			background-color: black;
+			color: white;
+			font-weight: bold;
+		}
+		.handsetsList {
+			width:  100%;
+			text-align: center;
+			font-weight: bold;
+		}
+		.handsetName {
+			margin: 15px;
+		}
+		.chartName {
+			margin: 15px;
+		}
+		.chartLabel {
+			display: block;
+			width: 100%;
+			height: 25px;
+			background-color: black;
+			color: white;
+			font-weight: bold
+		}
+		</style>
+		<script src="js/jquery-1.9.1.js"></script>
+		<script src="js/smoothie.js"></script>
+		<script type="text/javascript">
+
+		//
+		// Events Code
+		//
+
+		// buffer of incoming JSON text from events WebSocket
+		var rawEventBuffer = new String();
+
+		// how often to parse events from the raw incoming buffer in milliseconds
+		var eventParserRate = 20;
+
+		// stores complete events
+		var eventQueue = new Array();
+
+		// how often to process events in the queue in milliseconds
+		var eventProcessorRate = 20;
+
+		var fields = [
+			"rssi",
+			"fer",
+			"mspower",
+			"mstiming",
+			"rxlevel",
+			"rxquality"
+		];
+		var charts = {};
+		var activeCharts = fields.length;
+		var handsets = {};
+
+		// parse events from the buffer
+		function eventParser() {
+			var delimiter = "\r\n\r\n";
+
+			// see if we have a complete event
+			var end = rawEventBuffer.indexOf(delimiter);
+			if (end != -1) {
+				// grab the event text and turn it into an object
+				var tmpEvent = "var eObject = " + rawEventBuffer.slice(0, end);
+				eval(tmpEvent);
+				// store the object in the queue for processing
+				eventQueue.push(eObject);
+				// remove the event text from the raw buffer
+				rawEventBuffer = rawEventBuffer.slice(end + delimiter.length);
+			}
+
+			// schedule the parser to run again
+			setTimeout('eventParser()', eventParserRate);
+		}
+
+		// processed parsed events
+		function eventProcessor() {
+			// if there events to process
+			if (eventQueue.length) {
+
+				// chop one off the top
+				var message = eventQueue.shift();
+				var v;
+
+				// process PhysicalStatus event
+				if (message.name == "PhysicalStatus") {
+					var timestamp = new Date().getTime();
+					var imsi = message.data.channel.IMSI;
+					if (!handsets.hasOwnProperty(imsi)) {
+						addHandset(imsi);
+					}
+					handsets[imsi]["rssi"].append(timestamp, message.data.burst.RSSI);
+					handsets[imsi]["fer"].append(timestamp, message.data.channel.uplinkFrameErrorRate);
+					handsets[imsi]["mspower"].append(timestamp, message.data.burst.actualMSPower);
+					handsets[imsi]["mstiming"].append(timestamp, (message.data.burst.actualMSTimingAdvance + message.data.burst.timingError));
+					handsets[imsi]["rxlevel"].append(timestamp, message.data.reports.servingCell.RXLEVEL_FULL_dBm);
+					handsets[imsi]["rxquality"].append(timestamp, message.data.reports.servingCell.RXQUALITY_FULL_BER);
+					//message.data.burst.RSSP
+
+				} else {
+					// handle error if unknown event
+				}
+			}
+
+			// schedule the processor to run again
+			setTimeout('eventProcessor()', eventProcessorRate);
+		}
+
+		// connect to the events WebSocket and bind to events
+		function openBTSConnect() {
+
+			try {
+				openBTSSocket = new WebSocket("ws://" + top.location.hostname + ":8888/ws");
+
+				openBTSSocket.onopen = function() {
+					$("#openBTSState").html("connected");
+					eventParser();
+					eventProcessor();
+				}
+
+				openBTSSocket.onmessage = function(newMessage) {
+					rawEventBuffer = rawEventBuffer.concat(newMessage.data);
+				}
+
+				openBTSSocket.onclose = function() {
+					setTimeout(openBTSConnect, 2000);
+				}
+
+			} catch(exception) {
+				alert("Caught exception in openBTSSocket() : " + exception);
+			}
+		}
+
+		function initializeCharts() {
+			for (var i = 0; i < fields.length; i++) {
+				charts[fields[i]] = new SmoothieChart();
+				charts[fields[i]].streamTo(document.getElementById(fields[i]), 1000);
+			}
+
+			$(window).resize(function() {
+				var height = (window.innerHeight / activeCharts) - 25;
+				for (var i = 0; i < fields.length; i++) {
+					var tmp = $("#" + fields[i]);
+					ctx = tmp[0].getContext('2d');
+					ctx.canvas.width  = window.innerWidth - 150;
+					ctx.canvas.height = height;
+				}
+			});
+			$(window).resize();
+		}
+
+		function toggleHandset(imsi) {
+			if (handsets[imsi]["active"]) {
+				handsets[imsi]["active"] = false;
+				$('#' + imsi).removeClass('activated');
+				$('#' + imsi).addClass('deactivated');
+				for (var i = 0; i < fields.length; i++) {
+					charts[fields[i]].removeTimeSeries(handsets[imsi][fields[i]]);
+				}
+			} else {
+				handsets[imsi]["active"] = true;
+				$('#' + imsi).removeClass('deactivated');
+				$('#' + imsi).addClass('activated');
+				for (var i = 0; i < fields.length; i++) {
+					charts[fields[i]].addTimeSeries(handsets[imsi][fields[i]],
+						{ strokeStyle:'rgb(' + handsets[imsi]["color"] + ')', fillStyle:'rgba(' + handsets[imsi]["color"] + ', 0.4)', lineWidth:3 });
+				}
+			}
+		}
+
+		function toggleChart(chart) {
+			var pieces = chart.split("-");
+			if ($('#' + pieces[0]).is(':visible')) {
+				$('#' + chart).removeClass('activated');
+				$('#' + chart).addClass('deactivated');
+				$('#' + pieces[0]).hide();
+				$('#' + pieces[0] + '-label').hide();
+				activeCharts--;
+			} else {
+				$('#' + chart).removeClass('deactivated');
+				$('#' + chart).addClass('activated');
+				$('#' + pieces[0]).show();
+				$('#' + pieces[0] + '-label').show();
+				activeCharts++;
+			}
+			$(window).resize();
+		}
+
+		function addHandset(imsi) {
+			handsets[imsi] = {};
+			handsets[imsi]["active"] = true;
+			handsets[imsi]["color"] = (Math.floor(Math.random() * 256)) + ','
+				+ (Math.floor(Math.random() * 256)) + ','
+				+ (Math.floor(Math.random() * 256));
+
+			$('#handsetsList').append('<div class="handsetName" id="' + imsi + '" style="color: rgb(' + handsets[imsi]["color"] + ');">' + imsi + '</div>');
+			$('#' + imsi).on("click", function(){
+				toggleHandset($(this).attr('id'));
+			});
+
+			for (var i = 0; i < fields.length; i++) {
+				handsets[imsi][fields[i]] = new TimeSeries();
+				charts[fields[i]].streamTo(document.getElementById(fields[i]), 1000);
+				charts[fields[i]].addTimeSeries(handsets[imsi][fields[i]],
+					{ strokeStyle:'rgb(' + handsets[imsi]["color"] + ')', fillStyle:'rgba(' + handsets[imsi]["color"] + ', 0.4)', lineWidth:3 });
+			}
+		}
+
+		$(document).ready(function(){
+			openBTSConnect();
+			initializeCharts();
+
+			for (var i = 0; i < fields.length; i++) {
+				$('#' + fields[i] + '-control').on("click", function(){
+					toggleChart($(this).attr('id'));
+				});
+			}
+		});
+		</script>
+	</head>
+	<body>
+		<div class="leftMenu">
+			<h2>Charts</h2>
+			<div id="chartsList">
+				<div class="chartName" id="rssi-control">rssi</div>
+				<div class="chartName" id="fer-control">fer</div>
+				<div class="chartName" id="mspower-control">mspower</div>
+				<div class="chartName" id="mstiming-control">mstiming</div>
+				<div class="chartName" id="rxlevel-control">rxlevel</div>
+				<div class="chartName" id="rxquality-control">rxquality</div>
+			</div>
+			<h2>Handsets</h2>
+			<div id="handsetsList"></div>
+		</div>
+		<center>
+			<canvas id="rssi"></canvas>
+			<div id="rssi-label" class="chartLabel">Uplink RSSI (dB)</div>
+
+			<canvas id="fer"></canvas>
+			<div id="fer-label" class="chartLabel">Uplink FER (%)</div>
+
+			<canvas id="mspower"></canvas>
+			<div id="mspower-label" class="chartLabel">MS Power (dBm)</div>
+
+			<canvas id="mstiming"></canvas>
+			<div id="mstiming-label" class="chartLabel">MS TimingAdvance + Error (symbol periods)</div>
+
+			<canvas id="rxlevel"></canvas>
+			<div id="rxlevel-label" class="chartLabel">Downlink RXLEVEL_FULL_dBm (dBm)</div>
+
+			<canvas id="rxquality"></canvas>
+			<div id="rxquality-label" class="chartLabel">Downlink RXQUALITY_FULL_BER (%)</div>
+		</center>
+	</body>
+<html>

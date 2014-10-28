@@ -1,0 +1,188 @@
+<html>
+	<head>
+		<title>NodeManager Events API Visualizer</title>
+		<style>
+		html, body {
+			width:  100%;
+			height: 100%;
+			margin: 0px;
+		}
+		</style>
+		<script src="js/jquery-1.9.1.js"></script>
+		<script src="js/arbor.js"></script>
+		<script src="js/arbor-tween.js"></script>
+		<script src="js/graphics.js"></script>
+		<script src="js/renderer.js"></script>
+
+		<script type="text/javascript">
+
+		//
+		// Events Code
+		//
+
+		// buffer of incoming JSON text from events WebSocket
+		var rawEventBuffer = new String();
+
+		// how often to parse events from the raw incoming buffer in milliseconds
+		var eventParserRate = 20;
+
+		// stores complete events
+		var eventQueue = new Array();
+
+		// how often to process events in the queue in milliseconds
+		var eventProcessorRate = 20;
+
+		// parse events from the buffer
+		function eventParser() {
+			var delimiter = "\r\n\r\n";
+
+			// see if we have a complete event
+			var end = rawEventBuffer.indexOf(delimiter);
+			if (end != -1) {
+				// grab the event text and turn it into an object
+				var tmpEvent = "var eObject = " + rawEventBuffer.slice(0, end);
+				eval(tmpEvent);
+				// store the object in the queue for processing
+				eventQueue.push(eObject);
+				// remove the event text from the raw buffer
+				rawEventBuffer = rawEventBuffer.slice(end + delimiter.length);
+			}
+
+			// schedule the parser to run again
+			setTimeout('eventParser()', eventParserRate);
+		}
+
+		// processed parsed events
+		function eventProcessor() {
+			// if there events to process
+			if (eventQueue.length) {
+
+				// chop one off the top
+				var message = eventQueue.shift();
+				var v;
+
+				// process PhysicalStatus event
+				if (message.name == "PhysicalStatus") {
+					var timestamp = new Date();
+					var arfcn = message.data.channel.ARFCN.toString();
+					var imsi = message.data.channel.IMSI.toString();
+					var timeslot = message.data.channel.timeslotNumber.toString();
+					var type = message.data.channel.typeAndOffset;
+
+					if (!arfcns.hasOwnProperty(arfcn)) {
+						arfcns[arfcn] = {};
+						arfcns[arfcn]["node"] = sys.addNode(arfcn,{'color':'red','shape':'dot','label':'ARFCN:' + arfcn});
+						if (typeof arfcns[arfcn]["timeslots"] == "undefined") {
+							arfcns[arfcn]["timeslots"] = {};
+							for (var i = 0; i < 8; i++) {
+								ts = i.toString();
+								arfcns[arfcn]["timeslots"][ts] = {};
+								arfcns[arfcn]["timeslots"][ts]["node"] = sys.addNode(arfcn + ':' + ts,{'color':'orange','shape':'dot','label':'TS:' + ts});
+								sys.addEdge(arfcns[arfcn]["node"], arfcns[arfcn]["timeslots"][ts]["node"]);
+								arfcns[arfcn]["timeslots"][ts]["types"] = {};
+							}
+						}
+					}
+
+					if (!arfcns[arfcn]["timeslots"][timeslot]["types"].hasOwnProperty(type)) {
+						arfcns[arfcn]["timeslots"][timeslot]["types"][type] = {};
+						arfcns[arfcn]["timeslots"][timeslot]["types"][type]["node"] = sys.addNode(arfcn + ':' + timeslot + ':' + type,{'color':'green','shape':'dot','label':type});
+						sys.addEdge(arfcns[arfcn]["timeslots"][timeslot]["node"], arfcns[arfcn]["timeslots"][timeslot]["types"][type]["node"]);
+						if (typeof arfcns[arfcn]["timeslots"][timeslot]["types"][type]["imsis"] == "undefined") {
+							arfcns[arfcn]["timeslots"][timeslot]["types"][type]["imsis"] = {};
+						}
+					}
+					arfcns[arfcn]["timeslots"][timeslot]["types"][type]["timestamp"] = timestamp;
+
+					if (!arfcns[arfcn]["timeslots"][timeslot]["types"][type]["imsis"].hasOwnProperty(imsi)) {
+						arfcns[arfcn]["timeslots"][timeslot]["types"][type]["imsis"][imsi] = {};
+						arfcns[arfcn]["timeslots"][timeslot]["types"][type]["imsis"][imsi]["node"] = sys.addNode(imsi,{'color':'blue','shape':'dot','label':imsi});
+						sys.addEdge(arfcns[arfcn]["timeslots"][timeslot]["types"][type]["node"], arfcns[arfcn]["timeslots"][timeslot]["types"][type]["imsis"][imsi]["node"]);
+					}
+					arfcns[arfcn]["timeslots"][timeslot]["types"][type]["imsis"][imsi]["timestamp"] = timestamp;
+
+				} else {
+					// handle error if unknown event
+				}
+			}
+
+			// schedule the processor to run again
+			setTimeout('eventProcessor()', eventProcessorRate);
+		}
+
+		// connect to the events WebSocket and bind to events
+		function openBTSConnect() {
+
+			try {
+				openBTSSocket = new WebSocket("ws://" + top.location.hostname + ":8888/ws");
+
+				openBTSSocket.onopen = function() {
+					$("#openBTSState").html("connected");
+					eventParser();
+					eventProcessor();
+				}
+
+				openBTSSocket.onmessage = function(newMessage) {
+					rawEventBuffer = rawEventBuffer.concat(newMessage.data);
+				}
+
+				openBTSSocket.onclose = function() {
+					setTimeout(openBTSConnect, 2000);
+				}
+
+			} catch(exception) {
+				alert("Caught exception in openBTSSocket() : " + exception);
+			}
+		}
+
+		var sys;
+		var arfcns = {};
+		var reaperRate = 1000;
+		var reaperWindow = 2000;
+
+		function nodeReaper() {
+			var now = new Date();
+			var elapsed;
+			for (var arfcn in arfcns) {
+				for (var timeslot in arfcns[arfcn]["timeslots"]) {
+					for (var type in arfcns[arfcn]["timeslots"][timeslot]["types"]) {
+						for (var imsi in arfcns[arfcn]["timeslots"][timeslot]["types"][type]["imsis"]) {
+							elapsed = now - arfcns[arfcn]["timeslots"][timeslot]["types"][type]["imsis"][imsi]["timestamp"];
+							if (elapsed > reaperWindow) {
+								sys.pruneNode(arfcns[arfcn]["timeslots"][timeslot]["types"][type]["imsis"][imsi]["node"]);
+								delete arfcns[arfcn]["timeslots"][timeslot]["types"][type]["imsis"][imsi];
+							}
+						}
+						elapsed = now - arfcns[arfcn]["timeslots"][timeslot]["types"][type]["timestamp"];
+						if (elapsed > reaperWindow) {
+							sys.pruneNode(arfcns[arfcn]["timeslots"][timeslot]["types"][type]["node"]);
+							delete arfcns[arfcn]["timeslots"][timeslot]["types"][type];
+						}
+					}
+				}
+			}
+			setTimeout(nodeReaper, reaperRate);
+		}
+
+		$(document).ready(function(){
+			openBTSConnect();
+			nodeReaper();
+
+//			$(window).resize(function() {
+				var tmp = $("#viewport");
+				ctx = tmp[0].getContext('2d');
+				ctx.canvas.width  = window.innerWidth;
+				ctx.canvas.height = window.innerHeight;
+//			});
+//			$(window).resize();
+
+//			sys = arbor.ParticleSystem(50, 512, 0.1, true); //repulsion, stiffness, friction, gravity, fps, dt, precision
+			sys = arbor.ParticleSystem(600, 1000, .5, true);
+			sys.renderer = Renderer("#viewport");
+		});
+		</script>
+	</head>
+	<body>
+		<canvas id="viewport" width="800" height="600"></canvas>
+	</body>
+<html>

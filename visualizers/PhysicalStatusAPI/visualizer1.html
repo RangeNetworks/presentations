@@ -1,0 +1,462 @@
+<html>
+	<head>
+		<title>NodeManager Events API Visualizer</title>
+		<link rel="stylesheet" href="css/jquery-ui-1.10.1.custom.css">
+		<link rel="stylesheet" href="css/demo_table.css">
+		<link rel="stylesheet" href="css/jq.ext.css">
+
+		<style>
+		.C0Visualizer td {
+			border: 1px solid black;
+			width: 100px;
+			height: 100px;
+			text-align: center;
+		}
+		.C0VisualizerHeader td {
+			border: 0px;
+			height: 50px;
+			text-align: center;
+		}
+		</style>
+
+		<script src="js/jquery-1.9.1.js"></script>
+		<script src="js/jquery-ui-1.10.1.custom.js"></script>
+		<script src="js/jquery.sparkline.2.1.1.js"></script>
+		<script src="js/json2.js"></script>
+		<script src="js/jq.ext.tabs.js"></script>
+		<script type="text/javascript">
+
+		//
+		// Events Code
+		//
+
+		// buffer of incoming JSON text from events WebSocket
+		var rawEventBuffer = new String();
+
+		// how often to parse events from the raw incoming buffer in milliseconds
+		var eventParserRate = 20;
+
+		// stores complete events
+		var eventQueue = new Array();
+
+		// how often to process events in the queue in milliseconds
+		var eventProcessorRate = 20;
+
+		// chart samples
+		var CXTXSamples = {};
+
+		// max chart samples
+		var maxSamples = 30;
+
+		// last sample reading
+		var CXTXActivity = {};
+
+		// graphing fields
+		var fields = [
+			"RSSI",
+			"RSSP",
+			"actualMSPower",
+			"summedMSTiming",
+			"uplinkFrameErrorRate",
+			"RXLEVEL_FULL_dBm",
+			"RXQUALITY_FULL_BER"
+		];
+
+		// initialize an array of all zeros, used to setup flatlines in charts
+		function getZeroArray(size) {
+			var a = [];
+			for (var i = 0; i < size; i++) {
+				a[i] = null;
+			}
+			return a;
+		}
+
+		// initialize samples CXTXSamples object
+		function initSamples() {
+			CXTXActivity = [];
+			CXTXActivity[0] = [];
+			for (var i = 0; i < 7; i++) {
+				CXTXActivity[0][i] = new Date();
+			}
+
+			for (var i = 0; i < fields.length; i++) {
+				CXTXSamples[fields[i]] = [];
+				CXTXSamples[fields[i]][0] = [];
+				for (var ii = 0; ii < 7; ii++) {
+					CXTXSamples[fields[i]][0][ii] = getZeroArray(maxSamples);
+				}
+			}
+		}
+
+		// add a sample to the CXTXSamples object, auto-sizing on maxSamples
+		function addSample(C, T, field, value) {
+			CXTXSamples[field][C][T].push(value);
+			if (CXTXSamples[field][C][T].length > maxSamples) {
+				CXTXSamples[field][C][T].splice(0,1);
+			}
+		}
+
+		function registerTimeslotActivity(C, T) {
+			CXTXActivity[C][T] = new Date();
+		}
+
+		function timeslotReaper() {
+			var now = new Date();
+			for (var i = 0; i < 7; i++) {
+				var elapsed = now - CXTXActivity[0][i];
+				if (elapsed > 5000) {
+					clearTimeslot(0, i);
+				}
+			}
+			setTimeout(timeslotReaper, 1000);
+		}
+
+		function clearTimeslot(C, T) {
+			var CXTY = "C" + C + "T" + T;
+
+			$("#" + CXTY + "-type").html("");
+			$("#" + CXTY + "-imsi").html("");
+			$("#" + CXTY + "-arfcn").html("");
+
+			for (var i = 0; i < fields.length; i++) {
+				CXTXSamples[fields[i]][C][T] = getZeroArray(maxSamples);
+				$("#" + CXTY + "-" + fields[i] + "-chart").sparkline();
+				$("#" + CXTY + "-" + fields[i] + "-value").html("");
+			}
+		}
+
+		function clipWrite(id, string) {
+			var max = 20000;
+			var field = $('#' + id);
+			var text = field.val() + string;
+			var len = text.length;
+			if (len > max) {
+				text = text.substring(len - max);
+			}
+			field.val(text);
+			field.scrollTop(field[0].scrollHeight - field.height());
+		}
+
+		// parse events from the buffer
+		function eventParser() {
+			var delimiter = "\r\n\r\n";
+
+			// see if we have a complete event
+			var end = rawEventBuffer.indexOf(delimiter);
+			if (end != -1) {
+				// grab the event text and turn it into an object
+				var tmpEvent = "var eObject = " + rawEventBuffer.slice(0, end);
+				eval(tmpEvent);
+				// store the object in the queue for processing
+				eventQueue.push(eObject);
+				// remove the event text from the raw buffer
+				rawEventBuffer = rawEventBuffer.slice(end + delimiter.length);
+				// update the buffer length stat
+				$('#rawEventBufferLength').val(rawEventBuffer.length);
+			}
+
+			// schedule the parser to run again
+			setTimeout('eventParser()', eventParserRate);
+		}
+
+		// processed parsed events
+		function eventProcessor() {
+			// if there events to process
+			if (eventQueue.length) {
+
+				// chop one off the top
+				var message = eventQueue.shift();
+				var v;
+
+				// process PhysicalStatus event
+				if (message.name == "PhysicalStatus") {
+					// increment event counter
+					v = $('#physicalStatusEventLength');
+					v.val(parseInt(v.val()) + 1);
+
+					// split up channel field to grab ARFCN and timeslot
+					// TODO : this could be done server-side
+					var C = message.data.channel.carrierNumber;
+					var T = message.data.channel.timeslotNumber;
+					var CXTY = "C" + C + "T" + T;
+
+					registerTimeslotActivity(C, T);
+
+					// blink the timeslot header
+					$("#" + CXTY + "-header").effect("highlight", {}, 125);
+
+					// display the channel type
+					$("#" + CXTY + "-type").html(message.data.channel.typeAndOffset);
+
+					// display the IMSI
+					$("#" + CXTY + "-imsi").html(message.data.channel.IMSI);
+
+					// display the ARFCN
+					$("#" + CXTY + "-arfcn").html(message.data.channel.ARFCN);
+
+					// update samples
+					addSample(C, T, "RSSI", message.data.burst.RSSI);
+					addSample(C, T, "RSSP", message.data.burst.RSSP);
+					addSample(C, T, "actualMSPower", message.data.burst.actualMSPower);
+					addSample(C, T, "summedMSTiming", (message.data.burst.actualMSTimingAdvance + message.data.burst.timingError));
+					addSample(C, T, "uplinkFrameErrorRate", message.data.channel.uplinkFrameErrorRate);
+					addSample(C, T, "RXLEVEL_FULL_dBm", message.data.reports.servingCell.RXLEVEL_FULL_dBm);
+					addSample(C, T, "RXQUALITY_FULL_BER", message.data.reports.servingCell.RXQUALITY_FULL_BER);
+
+					// update labels
+					$("#" + CXTY + "-RSSI-value").html(message.data.burst.RSSI);
+					$("#" + CXTY + "-RSSP-value").html(message.data.burst.RSSP);
+					$("#" + CXTY + "-actualMSPower-value").html(message.data.burst.actualMSPower);
+					$("#" + CXTY + "-summedMSTiming-value").html((message.data.burst.actualMSTimingAdvance + message.data.burst.timingError));
+					$("#" + CXTY + "-uplinkFrameErrorRate-value").html(message.data.channel.uplinkFrameErrorRate);
+					$("#" + CXTY + "-RXLEVEL_FULL_dBm-value").html(message.data.reports.servingCell.RXLEVEL_FULL_dBm);
+					$("#" + CXTY + "-RXQUALITY_FULL_BER-value").html(message.data.reports.servingCell.RXQUALITY_FULL_BER);
+
+					// update diagrams
+					$("#" + CXTY + "-RSSI-chart").sparkline(CXTXSamples.RSSI[C][T], { height: "75px", fillColor: false, chartRangeMin: -75, chartRangeMax: 0, tooltipSuffix: ' dB' });
+					$("#" + CXTY + "-RSSP-chart").sparkline(CXTXSamples.RSSP[C][T], { height: "75px", fillColor: false, chartRangeMin: -75, chartRangeMax: 0, tooltipSuffix: ' dB' });
+					$("#" + CXTY + "-actualMSPower-chart").sparkline(CXTXSamples.actualMSPower[C][T], { height: "75px", fillColor: false, chartRangeMin: 0, chartRangeMax: 40, tooltipSuffix: ' dBm' });
+					$("#" + CXTY + "-summedMSTiming-chart").sparkline(CXTXSamples.summedMSTiming[C][T], { height: "75px", fillColor: false, chartRangeMin: 0, chartRangeMax: 62, tooltipSuffix: ' symbol periods' });
+					$("#" + CXTY + "-uplinkFrameErrorRate-chart").sparkline(CXTXSamples.uplinkFrameErrorRate[C][T], { height: "75px", fillColor: false, chartRangeMin: 0, chartRangeMax: 10, tooltipSuffix: ' %' });
+					$("#" + CXTY + "-RXLEVEL_FULL_dBm-chart").sparkline(CXTXSamples.RXLEVEL_FULL_dBm[C][T], { height: "75px", fillColor: false, chartRangeMin: -100, chartRangeMax: 0, tooltipSuffix: ' dBm' });
+					$("#" + CXTY + "-RXQUALITY_FULL_BER-chart").sparkline(CXTXSamples.RXQUALITY_FULL_BER[C][T], { height: "75px", fillColor: false, chartRangeMin: 0, chartRangeMax: 10, tooltipSuffix: ' dBm' });
+
+				// error if unknown event
+				} else {
+					v = $('#errorCount');
+					v.val(parseInt(v.val()) + 1);
+				}
+			}
+
+			// update the queue length stat
+			$('#eventQueueLength').val(eventQueue.length);
+
+			// schedule the processor to run again
+			setTimeout('eventProcessor()', eventProcessorRate);
+		}
+
+		// connect to the events WebSocket and bind to events
+		function openBTSConnect() {
+
+			try {
+				openBTSSocket = new WebSocket("ws://" + top.location.hostname + ":8888/ws");
+
+				openBTSSocket.onopen = function() {
+					$("#openBTSState").html("connected");
+					eventParser();
+					eventProcessor();
+				}
+
+				openBTSSocket.onmessage = function(newMessage) {
+					clipWrite("openBTSEvents", newMessage.data);
+					rawEventBuffer = rawEventBuffer.concat(newMessage.data);
+				}
+
+				openBTSSocket.onclose = function() {
+					$("#openBTSState").html("disconnected");
+					setTimeout(openBTSConnect, 2000);
+				}
+
+			} catch(exception) {
+				alert("Caught exception in openBTSSocket() : " + exception);
+			}
+		}
+
+		$(document).ready(function(){
+
+			$("#tabs").tabs();
+
+			$("#clear").click(function(event){
+				$("#output").html("");
+			});
+
+			initSamples()
+			openBTSConnect();
+			timeslotReaper();
+		});
+		</script>
+	</head>
+	<body>
+		<div id="tabs">
+			<ul>
+				<li><a href="#tabs-1">Events API Visualizer</a></li>
+				<li><a href="#tabs-2">Raw API Traffic</a></li>
+			</ul>
+			<div id="tabs-1">
+				<table class="C0Visualizer">
+					<tr>
+						<td class="C0VisualizerHeader"></td>
+						<td class="C0VisualizerHeader" colspan="2">
+							<table>
+								<tr>
+									<td colspan="2"><strong>ID</strong></td>
+								</tr>
+								<tr>
+									<td>ARFCN</td>
+									<td>Type</td>
+								</tr>
+							</table>
+						</td>
+						<td class="C0VisualizerHeader" colspan="3">
+							<table>
+								<tr>
+									<td colspan="3"><strong>Handset</strong></td>
+								</tr>
+								<tr>
+									<td>IMSI</td>
+									<td>Power</td>
+									<td>TimingAdvance + TimingError</td>
+								</tr>
+							</table>
+						</td>
+						<td class="C0VisualizerHeader" colspan="3">
+							<table>
+								<tr>
+									<td colspan="3"><strong>Uplink</strong></td>
+								</tr>
+								<tr>
+									<td>RSSI</td>
+									<td>RSSP</td>
+									<td>FER</td>
+								</tr>
+							</table>
+						</td>
+						<td class="C0VisualizerHeader" colspan="2">
+							<table>
+								<tr>
+									<td colspan="2"><strong>Downlink</strong></td>
+								</tr>
+								<tr>
+									<td>RXLEVEL<br>FULL dBM</td>
+									<td>RXQUALITY<br>FULL BER</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					<tr>
+						<td id="C0T0-header"><strong>0</strong></td>
+						<td id="C0T0-arfcn"></td>
+						<td id="C0T0-type"></td>
+						<td id="C0T0-imsi"></td>
+						<td><span id="C0T0-actualMSPower-chart"></span><br><span id="C0T0-actualMSPower-value"></span></td>
+						<td><span id="C0T0-summedMSTiming-chart"></span><br><span id="C0T0-summedMSTiming-value"></span></td>
+						<td><span id="C0T0-RSSI-chart"></span><br><span id="C0T0-RSSI-value"></span></td>
+						<td><span id="C0T0-RSSP-chart"></span><br><span id="C0T0-RSSP-value"></span></td>
+						<td><span id="C0T0-uplinkFrameErrorRate-chart"></span><br><span id="C0T0-uplinkFrameErrorRate-value"></span></td>
+						<td><span id="C0T0-RXLEVEL_FULL_dBm-chart"></span><br><span id="C0T0-RXLEVEL_FULL_dBm-value"></span></td>
+						<td><span id="C0T0-RXQUALITY_FULL_BER-chart"></span><br><span id="C0T0-RXQUALITY_FULL_BER-value"></span></td>
+					</tr>
+					<tr>
+						<td id="C0T1-header"><strong>1</strong></td>
+						<td id="C0T1-arfcn"></td>
+						<td id="C0T1-type"></td>
+						<td id="C0T1-imsi"></td>
+						<td><span id="C0T1-actualMSPower-chart"></span><br><span id="C0T1-actualMSPower-value"></span></td>
+						<td><span id="C0T1-summedMSTiming-chart"></span><br><span id="C0T1-summedMSTiming-value"></span></td>
+						<td><span id="C0T1-RSSI-chart"></span><br><span id="C0T1-RSSI-value"></span></td>
+						<td><span id="C0T1-RSSP-chart"></span><br><span id="C0T1-RSSP-value"></span></td>
+						<td><span id="C0T1-uplinkFrameErrorRate-chart"></span><br><span id="C0T1-uplinkFrameErrorRate-value"></span></td>
+						<td><span id="C0T1-RXLEVEL_FULL_dBm-chart"></span><br><span id="C0T1-RXLEVEL_FULL_dBm-value"></span></td>
+						<td><span id="C0T1-RXQUALITY_FULL_BER-chart"></span><br><span id="C0T1-RXQUALITY_FULL_BER-value"></span></td>
+					</tr>
+					<tr>
+						<td id="C0T2-header"><strong>2</strong></td>
+						<td id="C0T2-arfcn"></td>
+						<td id="C0T2-type"></td>
+						<td id="C0T2-imsi"></td>
+						<td><span id="C0T2-actualMSPower-chart"></span><br><span id="C0T2-actualMSPower-value"></span></td>
+						<td><span id="C0T2-summedMSTiming-chart"></span><br><span id="C0T2-summedMSTiming-value"></span></td>
+						<td><span id="C0T2-RSSI-chart"></span><br><span id="C0T2-RSSI-value"></span></td>
+						<td><span id="C0T2-RSSP-chart"></span><br><span id="C0T2-RSSP-value"></span></td>
+						<td><span id="C0T2-uplinkFrameErrorRate-chart"></span><br><span id="C0T2-uplinkFrameErrorRate-value"></span></td>
+						<td><span id="C0T2-RXLEVEL_FULL_dBm-chart"></span><br><span id="C0T2-RXLEVEL_FULL_dBm-value"></span></td>
+						<td><span id="C0T2-RXQUALITY_FULL_BER-chart"></span><br><span id="C0T2-RXQUALITY_FULL_BER-value"></span></td>
+					</tr>
+					<tr>
+						<td id="C0T3-header"><strong>3</strong></td>
+						<td id="C0T3-arfcn"></td>
+						<td id="C0T3-type"></td>
+						<td id="C0T3-imsi"></td>
+						<td><span id="C0T3-actualMSPower-chart"></span><br><span id="C0T3-actualMSPower-value"></span></td>
+						<td><span id="C0T3-summedMSTiming-chart"></span><br><span id="C0T3-summedMSTiming-value"></span></td>
+						<td><span id="C0T3-RSSI-chart"></span><br><span id="C0T3-RSSI-value"></span></td>
+						<td><span id="C0T3-RSSP-chart"></span><br><span id="C0T3-RSSP-value"></span></td>
+						<td><span id="C0T3-uplinkFrameErrorRate-chart"></span><br><span id="C0T3-uplinkFrameErrorRate-value"></span></td>
+						<td><span id="C0T3-RXLEVEL_FULL_dBm-chart"></span><br><span id="C0T3-RXLEVEL_FULL_dBm-value"></span></td>
+						<td><span id="C0T3-RXQUALITY_FULL_BER-chart"></span><br><span id="C0T3-RXQUALITY_FULL_BER-value"></span></td>
+					</tr>
+					<tr>
+						<td id="C0T4-header"><strong>4</strong></td>
+						<td id="C0T4-arfcn"></td>
+						<td id="C0T4-type"></td>
+						<td id="C0T4-imsi"></td>
+						<td><span id="C0T4-actualMSPower-chart"></span><br><span id="C0T4-actualMSPower-value"></span></td>
+						<td><span id="C0T4-summedMSTiming-chart"></span><br><span id="C0T4-summedMSTiming-value"></span></td>
+						<td><span id="C0T4-RSSI-chart"></span><br><span id="C0T4-RSSI-value"></span></td>
+						<td><span id="C0T4-RSSP-chart"></span><br><span id="C0T4-RSSP-value"></span></td>
+						<td><span id="C0T4-uplinkFrameErrorRate-chart"></span><br><span id="C0T4-uplinkFrameErrorRate-value"></span></td>
+						<td><span id="C0T4-RXLEVEL_FULL_dBm-chart"></span><br><span id="C0T4-RXLEVEL_FULL_dBm-value"></span></td>
+						<td><span id="C0T4-RXQUALITY_FULL_BER-chart"></span><br><span id="C0T4-RXQUALITY_FULL_BER-value"></span></td>
+					</tr>
+					<tr>
+						<td id="C0T5-header"><strong>5</strong></td>
+						<td id="C0T5-arfcn"></td>
+						<td id="C0T5-type"></td>
+						<td id="C0T5-imsi"></td>
+						<td><span id="C0T5-actualMSPower-chart"></span><br><span id="C0T5-actualMSPower-value"></span></td>
+						<td><span id="C0T5-summedMSTiming-chart"></span><br><span id="C0T5-summedMSTiming-value"></span></td>
+						<td><span id="C0T5-RSSI-chart"></span><br><span id="C0T5-RSSI-value"></span></td>
+						<td><span id="C0T5-RSSP-chart"></span><br><span id="C0T5-RSSP-value"></span></td>
+						<td><span id="C0T5-uplinkFrameErrorRate-chart"></span><br><span id="C0T5-uplinkFrameErrorRate-value"></span></td>
+						<td><span id="C0T5-RXLEVEL_FULL_dBm-chart"></span><br><span id="C0T5-RXLEVEL_FULL_dBm-value"></span></td>
+						<td><span id="C0T5-RXQUALITY_FULL_BER-chart"></span><br><span id="C0T5-RXQUALITY_FULL_BER-value"></span></td>
+					</tr>
+					<tr>
+						<td id="C0T6-header"><strong>6</strong></td>
+						<td id="C0T6-arfcn"></td>
+						<td id="C0T6-type"></td>
+						<td id="C0T6-imsi"></td>
+						<td><span id="C0T6-actualMSPower-chart"></span><br><span id="C0T6-actualMSPower-value"></span></td>
+						<td><span id="C0T6-summedMSTiming-chart"></span><br><span id="C0T6-summedMSTiming-value"></span></td>
+						<td><span id="C0T6-RSSI-chart"></span><br><span id="C0T6-RSSI-value"></span></td>
+						<td><span id="C0T6-RSSP-chart"></span><br><span id="C0T6-RSSP-value"></span></td>
+						<td><span id="C0T6-uplinkFrameErrorRate-chart"></span><br><span id="C0T6-uplinkFrameErrorRate-value"></span></td>
+						<td><span id="C0T6-RXLEVEL_FULL_dBm-chart"></span><br><span id="C0T6-RXLEVEL_FULL_dBm-value"></span></td>
+						<td><span id="C0T6-RXQUALITY_FULL_BER-chart"></span><br><span id="C0T6-RXQUALITY_FULL_BER-value"></span></td>
+					</tr>
+					<tr>
+						<td id="C0T7-header"><strong>7</strong></td>
+						<td id="C0T7-arfcn"></td>
+						<td id="C0T7-type"></td>
+						<td id="C0T7-imsi"></td>
+						<td><span id="C0T7-actualMSPower-chart"></span><br><span id="C0T7-actualMSPower-value"></span></td>
+						<td><span id="C0T7-summedMSTiming-chart"></span><br><span id="C0T7-summedMSTiming-value"></span></td>
+						<td><span id="C0T7-RSSI-chart"></span><br><span id="C0T7-RSSI-value"></span></td>
+						<td><span id="C0T7-RSSP-chart"></span><br><span id="C0T7-RSSP-value"></span></td>
+						<td><span id="C0T7-uplinkFrameErrorRate-chart"></span><br><span id="C0T7-uplinkFrameErrorRate-value"></span></td>
+						<td><span id="C0T7-RXLEVEL_FULL_dBm-chart"></span><br><span id="C0T7-RXLEVEL_FULL_dBm-value"></span></td>
+						<td><span id="C0T7-RXQUALITY_FULL_BER-chart"></span><br><span id="C0T7-RXQUALITY_FULL_BER-value"></span></td>
+					</tr>
+				</table>
+			</div>
+			<div id="tabs-2">
+				<table>
+					<tr>
+						<td>
+							<textarea id="openBTSEvents" name="openBTSEvents" rows="20" cols="100"></textarea>
+						</td>
+					</tr>
+					<tr>
+						<td align="right">
+							STATE : <span id="openBTSState" name="openBTSState">uninitialized</span><br>
+							rawEventBufferLength : <input id="rawEventBufferLength" type="text" size="10" value="0"><br>
+							eventQueueLength : <input id="eventQueueLength" type="text" size="10" value="0"><br>
+							physicalStatusEventLength : <input id="physicalStatusEventLength" type="text" size="10" value="0"><br>
+							errorCount : <input id="errorCount" type="text" size="10" value="0">
+						</td>
+					</tr>
+				</table>
+			</div>
+		</div>
+	</body>
+<html>

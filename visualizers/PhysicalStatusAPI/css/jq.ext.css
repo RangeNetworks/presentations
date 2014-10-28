@@ -1,0 +1,161 @@
+/*
+ Copyright 2013, 2014 Range Networks, Inc.
+
+ This software is distributed under multiple licenses;
+ see the COPYING file in the main directory for licensing
+ information for this specific distribuion.
+
+ This use of this software may be subject to additional restrictions.
+ See the LEGAL file in the main directory for details.
+
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
+*/
+
+h1, h2, h3, h4, h5, h6 {
+	font-weight: normal;
+	font-family: UbuntuR, Arial, sans-serif;
+}
+
+/* ditch jQuery's Verdana and Arial */
+.ui-widget,
+.ui-widget button {
+	font-family: UbuntuC, "Arial Narrow", sans-serif;
+}
+
+/* Ditch bolds, too */
+.ui-datepicker th,
+.ui-widget-header, 
+.ui-widget-header .ui-priority-primary {
+	font-weight: normal;
+	font-family: UbuntuR, Arial, sans-serif;
+}
+
+/* Vertical buttonset */
+.jqext-buttonset-v.jqext .ui-button {
+	display: block;
+	margin-bottom: -1px;
+}
+.jqext-buttonset-h.jqext .ui-button {
+	display: inline-block;
+	margin-right: -4px;
+}
+.jqext-buttonset-h.jqext .ui-button .ui-button-text,
+.jqext-buttonset-v.jqext .ui-button .ui-button-text {
+	display: inline-block;
+}
+
+/* Flip flip-slider buttonset */
+.ui-buttonset.jqext-flip-slider {
+	position: relative;
+}
+
+/* Vertical tabs */
+.jqext-tabs-v.jqext {
+	padding: .2em;
+}
+
+.jqext-tabs-v.jqext .ui-tabs-nav {
+	background-image: none;
+	background-color: white;
+	margin: .2em 0 .2em .2em;
+	padding: .2em 0 0 .2em;
+	position: absolute;
+	top: 0;
+	left: 0;
+}
+.jqext-tabs-v.jqext .ui-tabs-nav > li {
+	border-bottom: 1px solid;
+	border-right: 0;
+	clear: left;
+	float: none;
+	margin: 0 0 .2em 1px;
+	right: 0; 
+}
+.jqext-tabs-v.jqext .ui-tabs-nav > li a {
+	display: block;
+	float: none;
+	padding: .5em 1em;
+}
+.jqext-tabs-v.jqext .ui-tabs-nav > li.ui-tabs-active {
+	margin-bottom: .2em;
+	margin-right: -1px;
+	padding-bottom: 0;
+	padding-right: 1px;
+}
+
+.ui-tabs.jqext .ui-tabs-panel {
+	padding: 0.4em 1em;
+}
+
+/* Slider marks */
+.ui-slider.jqext {}
+
+.ui-slider-horizontal.jqext { 
+	height: 10px; 
+	margin-bottom: 36px;
+}
+.ui-slider-vertical.jqext { 
+	margin: 1em 36px 1em 0;
+	width: 10px; 
+}
+
+.ui-slider-horizontal.jqext .jqext-slider-mark-min, 
+.ui-slider-horizontal.jqext .jqext-slider-mark-max,
+.ui-slider-horizontal.jqext .jqext-slider-tick {
+	background-image: url('jqext-images/slider-horizontal-ticks-888888.png');
+	font-family: UbuntuC, "Arial Narrow", sans-serif;
+	font-size: 12px;
+	position: absolute;
+	text-align: center;
+	width: 32px; overflow: visible;
+}
+.ui-slider-horizontal.jqext .jqext-slider-mark-min,
+.ui-slider-horizontal.jqext .jqext-slider-mark-max {
+	background-position: -32px 0;
+	background-repeat: repeat-y;
+	bottom: -20px;
+	height: 12px;
+	padding-top: 6px;
+}
+.ui-slider-horizontal.jqext .jqext-slider-mark-min { left: -16px; }
+.ui-slider-horizontal.jqext .jqext-slider-mark-max { right: -16px; }
+.ui-slider-horizontal.jqext .jqext-slider-tick { 
+	background-position: 0 0;
+	bottom: -12px;
+	height: 8px;
+}
+
+.ui-slider-vertical.jqext .jqext-slider-mark-min,
+.ui-slider-vertical.jqext .jqext-slider-mark-max,
+.ui-slider-vertical.jqext .jqext-slider-tick {
+	background-image: url('jqext-images/slider-vertical-ticks-888888.png');
+	position: absolute;
+	text-align: left;
+	width: 32px; height: 12px; overflow: visible;
+}
+.ui-slider-vertical.jqext .jqext-slider-mark-min,
+.ui-slider-vertical.jqext .jqext-slider-mark-max {
+	background-position: 0 -42px;
+	background-repeat: repeat-x;
+	padding-left: 8px;
+	right: -42px;
+}
+
+.ui-slider-vertical.jqext .jqext-slider-mark-min { bottom: -5px; } 
+.ui-slider-vertical.jqext .jqext-slider-mark-max { top: -7px; }
+.ui-slider-vertical.jqext .jqext-slider-tick { 
+	background-position: 0 -10px;
+	right: -16px;
+	width: 11px;
+}
+
+.ui-slider-horizontal.jqext .jqext-slider-value-current {
+/*	bottom: -20px;
+	height: 12px; */
+	padding-top: 6px;
+	position: absolute;
+	text-align: center;
+}
+
